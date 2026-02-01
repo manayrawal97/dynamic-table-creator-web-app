@@ -50,13 +50,12 @@ exports.deleteTable = async (req, res) => {
 };
 
 
-// Export table
+
 exports.exportTable = async (req, res) => {
   try {
     const tableId = req.params.id;
-    const format = req.query.format || "json"; // default json
+    const format = req.query.format || "json"; 
 
-    // Fetch table for this user
     const [rows] = await pool.query(
       "SELECT * FROM tables WHERE id = ? AND user_id = ?",
       [tableId, req.user.userId]
@@ -67,15 +66,14 @@ exports.exportTable = async (req, res) => {
     }
 
     const table = rows[0];
-    const cells = JSON.parse(table.cells); // convert JSON string to array
+    const cells = JSON.parse(table.cells);
 
     if (format === "csv") {
-      // Convert 2D array to CSV
-      // Flatten rows into objects with column names A, B, C...
+     
       const data = cells.map(row => {
         const obj = {};
         row.forEach((cell, index) => {
-          obj[String.fromCharCode(65 + index)] = cell; // 65 = 'A'
+          obj[String.fromCharCode(65 + index)] = cell;
         });
         return obj;
       });
@@ -87,7 +85,7 @@ exports.exportTable = async (req, res) => {
       res.setHeader("Content-Type", "text/csv");
       return res.send(csv);
     } else {
-      // JSON export
+
       res.setHeader("Content-Disposition", `attachment; filename=${table.table_name}.json`);
       res.setHeader("Content-Type", "application/json");
       return res.json({
