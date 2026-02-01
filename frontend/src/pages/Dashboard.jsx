@@ -58,7 +58,7 @@ export default function Dashboard() {
   const [activeTable, setActiveTable] = useState(null);
   const [cells, setCells] = useState([]);
   const [editingCell, setEditingCell] = useState(null); 
-
+const [tableName, setTableName] = useState("");
   useEffect(() => {
     loadTables();
   }, []);
@@ -72,19 +72,26 @@ export default function Dashboard() {
     }
   };
 
-  const createTable = async () => {
-    try {
-      await api.post("/tables", {
-        tableName: "New Table",
-        rows: 1,
-        columns: 1,
-        cells: [[""]],
-      });
-      loadTables();
-    } catch (error) {
-      console.error("Failed to create table:", error);
-    }
-  };
+const createTable = async () => {
+  if (!tableName.trim()) {
+    alert("Please enter table name");
+    return;
+  }
+
+  try {
+    await api.post("/tables", {
+      tableName: tableName,
+      rows: 1,
+      columns: 1,
+      cells: [[""]],
+    });
+
+    setTableName("");
+    loadTables();
+  } catch (error) {
+    console.error("Failed to create table:", error);
+  }
+};
   const downloadFile = async (id, format) => {
     const res = await api.get(
       `/tables/${id}/export?format=${format}`,
@@ -217,7 +224,9 @@ export default function Dashboard() {
           >
             ← Back
           </button>
-
+<h2 className="text-2xl font-semibold mb-4 text-gray-700">
+  {activeTable.table_name}
+</h2>
           <div className="space-x-2">
             <button onClick={addRow} className="bg-gray-300 px-3 py-1 rounded">
               + Row
@@ -311,12 +320,22 @@ export default function Dashboard() {
       </div>
 
       <div className="p-6">
-        <button
-          onClick={createTable}
-          className="bg-orange-400 text-white px-6 py-2 rounded mb-6"
-        >
-          + New Table
-        </button>
+        <div className="flex gap-3 mb-6">
+  <input
+    type="text"
+    placeholder="Enter table name"
+    value={tableName}
+    onChange={(e) => setTableName(e.target.value)}
+    className="border px-3 py-2 rounded w-64 outline-none focus:border-orange-400"
+  />
+
+  <button
+    onClick={createTable}
+    className="bg-orange-400 text-white px-6 py-2 rounded"
+  >
+    + New Table
+  </button>
+</div>
 
         <div className="grid md:grid-cols-3 gap-4">
           {tables.map((t) => (
