@@ -1,11 +1,9 @@
 import api from "../api/api";
 import { useEffect, useState } from "react";
 
-// Helper functions
 const colName = (i) => String.fromCharCode(65 + i);
 
 const evalFormula = (value, cells) => {
-  // Ensure value is always a string
   if (value === null || value === undefined) return "";
   if (typeof value !== 'string') return String(value);
   if (!value.startsWith("=")) return value;
@@ -34,14 +32,12 @@ const evalFormula = (value, cells) => {
   }
 };
 
-// Helper to safely get cell value (never undefined)
 
 const getCellValue = (cell) => {
   if (cell === null || cell === undefined) return "";
   return String(cell);
 };
 
-// Evaluate all cells (convert formulas to results)
 const evaluateCellsForSave = (cells) => {
   return cells.map((row) =>
     row.map((cell) => {
@@ -61,7 +57,7 @@ export default function Dashboard() {
   const [tables, setTables] = useState([]);
   const [activeTable, setActiveTable] = useState(null);
   const [cells, setCells] = useState([]);
-  const [editingCell, setEditingCell] = useState(null); // Track which cell is being edited
+  const [editingCell, setEditingCell] = useState(null); 
 
   useEffect(() => {
     loadTables();
@@ -110,7 +106,6 @@ export default function Dashboard() {
       setActiveTable(res.data);
       const rawCells = JSON.parse(res.data.cells);
 
-      // Normalize cells - ensure no undefined/null values
       const normalized = rawCells.map((row) =>
         row.map((cell) => getCellValue(cell))
       );
@@ -151,7 +146,7 @@ export default function Dashboard() {
     const copy = cells.map((row, rowIdx) =>
       row.map((cell, colIdx) => {
         if (rowIdx === r && colIdx === c) {
-          return val ?? ""; // Ensure never undefined
+          return val ?? ""; 
         }
         return cell;
       })
@@ -162,7 +157,6 @@ export default function Dashboard() {
 
   const saveTable = async () => {
     try {
-      // ✅ Evaluate all formulas before saving
       const evaluatedCells = evaluateCellsForSave(cells);
 
       await api.put(`/tables/${activeTable.id}`, {
@@ -172,7 +166,6 @@ export default function Dashboard() {
         cells: evaluatedCells,
       });
 
-      // ✅ Update local state with evaluated values
       setCells(evaluatedCells);
 
       alert("Saved successfully!");
@@ -197,16 +190,13 @@ export default function Dashboard() {
     window.location = "/";
   };
 
-  // Get display value for a cell
   const getDisplayValue = (cell, r, c) => {
     const safeCell = getCellValue(cell);
 
-    // If this cell is being edited, show raw value
     if (editingCell?.r === r && editingCell?.c === c) {
       return safeCell;
     }
 
-    // Otherwise, evaluate formulas
     if (safeCell.startsWith("=")) {
       return evalFormula(safeCell, cells);
     }
