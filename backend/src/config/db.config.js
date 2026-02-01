@@ -9,7 +9,6 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-// Test DB connection
 (async () => {
   try {
     const connection = await pool.getConnection();
@@ -18,7 +17,7 @@ const pool = mysql.createPool({
   } catch (error) {
     console.error("❌ MySQL Database connection failed");
     console.error(error.message);
-    process.exit(1); // stop server if DB fails
+    process.exit(1);
   }
 })();
 
