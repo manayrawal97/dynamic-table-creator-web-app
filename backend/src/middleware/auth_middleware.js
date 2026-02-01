@@ -7,7 +7,6 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: "Access denied" });
   }
 
-  // Token comes as "Bearer <token>", split it
   const token = authHeader.split(" ")[1];
 
   if (!token) {
@@ -16,7 +15,7 @@ module.exports = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { userId: ... }
+    req.user = decoded; 
     next();
   } catch (err) {
     console.error(err.message);
